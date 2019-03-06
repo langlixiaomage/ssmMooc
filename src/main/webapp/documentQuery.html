@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+<meta charset="UTF-8">
+<link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
+<link rel="stylesheet" type="text/css"
+	href="css/bootstrap-responsive.css" />
+<link rel="stylesheet" type="text/css" href="css/style.css" />
+<script type="text/javascript" src="js/jquery2.js"></script>
+<script type="text/javascript" src="js/bootstrap.js"></script>
+<script type="text/javascript" src="js/ckform.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+	<!--字体图标-->
+	<link href="http://cdn.javaex.cn/javaex/pc/css/icomoon.css" rel="stylesheet" />
+	<!--动画-->
+	<link href="http://cdn.javaex.cn/javaex/pc/css/animate.css" rel="stylesheet" />
+	<!--骨架样式-->
+	<link href="http://cdn.javaex.cn/javaex/pc/css/common.css" rel="stylesheet" />
+	<!--皮肤（缇娜）-->
+	<link href="http://cdn.javaex.cn/javaex/pc/css/skin/tina.css" rel="stylesheet" />
+	<!--jquery，不可修改版本-->
+	<script src="js/jquery-3.3.1.js"></script>
+	<!--全局动态修改-->
+	<script src="http://cdn.javaex.cn/javaex/pc/js/common.js"></script>
+	<!--核心组件-->
+	<script src="http://cdn.javaex.cn/javaex/pc/js/javaex.min.js"></script>
+	<!--表单验证-->
+	<script src="http://cdn.javaex.cn/javaex/pc/js/javaex-formVerify.js"></script>
+
+<style type="text/css">
+body {font-size: 20px;
+	padding-bottom: 40px;
+	background-color: #e9e7ef;
+}
+
+.sidebar-nav {
+	padding: 9px 0;
+}
+
+@media ( max-width : 980px) {
+	/* Enable use of floated navbar text */
+	.navbar-text.pull-right {
+		float: none;
+		padding-left: 5px;
+		padding-right: 5px;
+	}
+}
+</style>
+	<script type="text/javascript">
+		function fullToby(documents){
+            for (var i = 0; i < documents.length; i++) {
+                var tr = $("<tr></tr>");
+                var checkbox = $("<td><input type='checkbox' name='follow'/></td>");
+                var nameId = $("<td>"+documents[i].name + "</td>");
+                var kindId = $("<td>"+documents[i].kind.bigname+"-"+documents[i].kind.smallname + "</td>");
+                var uploadNameId = $("<td></td>");
+                var nicknameId = $("<a>"+documents[i].uploadUser.username + "</a>");
+				nicknameId.attr("href","/userDetail?username="+documents[i].uploadUser.username+"&usertype="+documents[i].uploadUser.usertype);
+                uploadNameId.append(nicknameId);
+                var uploadTimeId = $("<td>"+documents[i].uploadDate + "</td>");
+                var deleteId = $("<td><button id='"+documents[i].id+"'>删除</button></td>");
+                tr.append(checkbox);
+                tr.append(nameId);
+                tr.append(kindId);
+                tr.append(uploadNameId);
+                tr.append(uploadTimeId);
+                tr.append(deleteId);
+                $("tbody").append(tr);
+                delDocument($("#"+documents[i].id));
+            }
+		}
+	</script>
+</head>
+<body>
+
+		<font color="#777777"><strong>文档名称：</strong></font>
+        <input type="text" name="menuname" id="menuname" class="abc input-default" >&nbsp;&nbsp;
+		<button class="btn btn-primary">查询</button>
+		&nbsp;&nbsp;
+		<button type="button"  id="addnew">
+			<a href="documentAdd.html">添加文档</a>
+		</button>
+	<table class="table table-bordered table-hover definewidth m10">
+		<thead></thead>
+		<tbody></tbody>
+	</table>
+
+</body>
+<script type="text/javascript">
+
+    var tbody = $("tbody");
+    var thead = $("thead");
+    $.post("getAllDocuments",function (documents) {
+        var tr = $("<tr></tr>");
+        tr.html("<th><input type='checkbox' id='allcheck'/><button id='someDel'>批量删除</button></th><th>文档名称</th><th>分类</th><th>上传者</th><th>上传日期</th><th>管理菜单</th>");
+        thead.html(tr);
+        fullToby(documents);
+        $("#allcheck").click(function(){
+            var isok = this.checked;//布尔类型
+            $("input[name='follow']").each(function(){
+                if(this.checked != isok){
+                    this.checked = isok;
+                }
+            });
+        });
+        $("#someDel").click(function () {
+            if(confirm("你确定?")){
+                $("input[name='follow']").each(function () {
+                    if(this.checked == "checked"){
+                        var lastTd = $(this).parent().parent().children("td:last-child");
+                        alert(lastTd);
+                        alert(lastTd.find("button"));
+                        delDocument(lastTd.find("button"));
+                    }
+                });
+            }
+        });
+    });
+    $(".btn-primary").click(function () {
+        var menu = $("#menuname").val();
+        $.ajax({
+            url:"/moocmaven/showDocumentByNameAction",
+            type:"get",
+            data:"name="+menu,
+            success:function (documents) {
+                $("tbody").empty();
+                fullToby(documents);
+            },
+            dataType:"json"
+        });
+    });
+    function delDocument(btn) {
+        btn.click(function () {
+            if (confirm("are you true?")) {
+                $.get("deleteDocumentAction",{"id":btn.attr("id")},function () {
+                    btn.parent().parent().remove();
+                    javaex.optTip({
+                        content: "操作成功",
+                        type: "success"
+                    });
+                });
+            }
+        });
+    }
+</script>
+</html>

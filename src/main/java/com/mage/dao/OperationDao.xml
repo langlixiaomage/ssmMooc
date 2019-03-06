@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org/DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mage.dao.OperationDao">
+    <resultMap id="userPro" type="userInfo">
+        <id column="username" property="username"></id>
+        <result column="name" property="name"></result>
+        <result column="email" property="email"></result>
+        <result column="createtime" property="createtime"></result>
+        <result column="usertype" property="usertype"></result>
+        <collection property="operations" ofType="operation" resultMap="operationPro"></collection>
+    </resultMap>
+    <resultMap id="operationPro" type="operation">
+        <id property="id" column="id"></id>
+        <result property="name" column="name"></result>
+        <result property="time" column="time"></result>
+        <result property="type" column="type"></result>
+    </resultMap>
+
+    <select id="selectOperationsByUsername" resultMap="userPro" parameterType="string">
+        select u.*,o.id,o.name,o.type,o.time from userinfo u left join operation o on u.username = o.username where u.username = #{username}
+    </select>
+</mapper>  
